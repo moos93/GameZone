@@ -1,0 +1,75 @@
+﻿@model Game
+
+
+<div class="card shadow border-0 mt-4">
+    <div class="card-header bg-dark bg-gradient ml-0 py-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-white py-2">Delete Game</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <form method="post">
+            <input asp-for="Id" hidden />
+            <div class="border p-3 mt-4">
+                <div class="form-floating py-2 col-12">
+                    <input asp-for="Id" disabled class="form-control border-0 shadow" />
+                    <label asp-for="Id" class="ms-2"></label>
+                </div>
+                <div class="form-floating py-2 col-12">
+                    <input asp-for="Name" disabled class="form-control border-0 shadow" />
+                    <label asp-for="Name" class="ms-2"></label>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-6 col-md-3">
+                        <button type="button" class="btn btn-outline-danger form-control" onclick="deleteAlert()">Delete</button>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <a asp-controller="Games" asp-action="Index" class="btn btn-dark border  form-control">
+                            Back to List
+                        </a>
+                    </div>
+                </div>
+
+
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function deleteAlert() {
+            event.preventDefault();
+            var form = event.target.form;
+            Swal.fire({
+                icon: "warning",
+                title: "Are You Sure You Want To Delete?",
+                showDenyButton: true,
+                confirmButtonText: "Hell yeah!",
+                showClass: {
+                    popup: `
+                              animate__animated
+                              animate__fadeInUp
+                              animate__faster
+                            `
+                },
+                hideClass: {
+                    popup: `
+                              animate__animated
+                              animate__fadeOutDown
+                              animate__faster
+                            `
+                }
+            }).then((result) => {
+                if (result.value) {
+                    form.submit();
+                  
+                }
+            })
+        }
+    </script>
+
+}
