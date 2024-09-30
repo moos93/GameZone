@@ -1,0 +1,36 @@
+﻿@model GameZone.Models.Game
+@using System.Globalization
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer localizer
+
+<div class="card shadow border-0 mt-4">
+    <div class="card-header bg-dark bg-gradient ml-0 py-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-white py-2">@localizer["Viewing game"] : @Model.Name </h2>
+            </div>
+        </div>
+    </div>
+    </div>
+<h3>@localizer["Game Name"]</h3>
+<p>@Model.Name</p>
+<h3>@localizer["Level"]</h3>
+<p>@Model.Level</p>
+<h3>@localizer["Description"]</h3>
+<p> @Model.Description</p>
+
+<div class="row pt-2">
+    <div class="col-6 col-md-3">
+        <a asp-controller="Game" asp-action="Index" class="btn btn-dark border  form-control">
+            @localizer["Back To List"]
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-info border  form-control">@localizer["Edit"]</a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a asp-action="Delete" asp-route-id="@Model.Id" class=" btn btn-danger border form-control">@localizer["Delete"]</a>
+    </div>
+</div>
+
+

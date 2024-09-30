@@ -1,0 +1,84 @@
+﻿ @model List<Game>
+
+@using Microsoft.AspNetCore.Mvc.Localization
+@using GameZone.Models
+@using System.Globalization
+@inject IViewLocalizer localizer
+<link rel="stylesheet" href="https://cdn.datatables.net/2.1.5/js/dataTables.min.js" />
+<link rel="stylesheet" href="https://cdn.datatables.net/v/dt/dt-2.1.6/datatables.min.css">
+
+
+
+
+<div class="card shadow border-0 mt-4">
+    <div class="card-header bg-dark bg-dark ml-0 py-3">
+        <div class="row ">
+            <div class="col-12 text-center ">
+                <h2 class="text-white py-2 "> @localizer["GAME LIST"]</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <div class="row pb-3">
+            <div class="col-6">
+            </div>
+            <div class="col-6 text-start "style="margin-right:200px">
+                <a asp-controller="Game" asp-action="Create" class="btn btn-outline-success">
+                    <i class="bi bi-plus-square"></i> @localizer["Create New Game"]
+                </a>
+            </div>
+        </div>
+
+        <table class="table table-bordered table-striped  table-hover" id="GameTable">
+            <thead>
+                <tr>
+                  
+                    <th class="text-center text-white bg-dark bg-dark">
+                        @localizer["Game Name"]
+                    </th>
+                    <th class="text-center text-white bg-dark bg-dark">
+                        @localizer["Description"]
+                    </th>
+                    <th class="text-center text-white bg-dark bg-dark">
+                        @localizer["Level"]
+                    </th>
+                    <th class="text-center text-white bg-dark bg-dark">
+                        @localizer["Modifying"]
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                 @foreach (var obj in Model.OrderBy(u => u.Id))
+                {
+
+                    <tr class="text-center">
+                        
+                        <td>@obj.Name</td>
+                        <td class="text-center">
+                            @obj.Description
+                        </td>
+                        <td class="text-center">
+                            @obj.Level
+                        </td>
+                        <td>
+                            <div class="w-75 btn-group" role="group">
+                                <a asp-controller="Game" asp-action="Edit" asp-route-id="@obj.Id" class="btn btn-secandary mx-2 ">
+                                    <i class="bi bi-pencil-square text-info"></i>
+                                </a>
+                                <a asp-controller="Game" asp-action="Delete" asp-route-id="@obj.Id" class="btn btn-secandary mx-2">
+                                    <i class="bi bi-trash text-danger"></i>
+                                </a>
+                                <a asp-controller="Game" asp-action="Details" asp-route-id="@obj.Id" class="btn btn-secandary mx-2">
+                                    <i class="bi bi-eye text-success"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr> 
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<script src="~/js/game.js"></script>
