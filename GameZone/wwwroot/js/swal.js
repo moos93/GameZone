@@ -1,4 +1,5 @@
 ﻿function successAlerts() {
+
     event.preventDefault();
     var form = event.target.form;
     Swal.fire({

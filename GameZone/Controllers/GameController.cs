@@ -5,23 +5,28 @@ using Newtonsoft.Json;
 
 namespace GameZone.Controllers
 {
-    
     public class GameController : Controller
     {
         private readonly ManageApi _manageApi;
-        public GameController(ManageApi manageApi)
+        private readonly string _baseUrl;
+
+        public GameController(ManageApi manageApi, IConfiguration config)
         {
             _manageApi = manageApi;
+            _baseUrl = config.GetSection("ApiSettings")["BaseUrl"]; // Fetch the baseUrl from appsettings.json
         }
+
+        // GET: Get all games
         public async Task<IActionResult> Index()
         {
-            var games = await _manageApi.GetAsync<List<Game>>("https://localhost:7064/api/Game");
+            var games = await _manageApi.GetAllGamesAsync(_baseUrl);
             return View(games);
         }
 
-        public async Task<IActionResult> Edit(int id)
+        // GET: Get game by ID
+        public async Task<IActionResult> Details(int id)
         {
-            var game = await _manageApi.GetAsync<Game>($"https://localhost:7064/api/Game/{id}");
+            var game = await _manageApi.GetGameByIdAsync(id, _baseUrl);
             if (game == null)
             {
                 return NotFound();
@@ -29,18 +34,21 @@ namespace GameZone.Controllers
             return View(game);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Edit(int id, Game game)
+        // GET: Create game view
+        public IActionResult Create()
         {
-            if (id != game.Id)
-            {
-                return BadRequest();
-            }
+            return View();
+        }
 
+        // POST: Create game
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Game game)
+        {
             if (ModelState.IsValid)
             {
-                bool success = await _manageApi.PutAsync($"https://localhost:7064/api/Game/{id}", game);
-                if (success)
+                var response = await _manageApi.CreateGameAsync(game, _baseUrl);
+                if (response.IsSuccessStatusCode)
                 {
                     return RedirectToAction(nameof(Index));
                 }
@@ -48,9 +56,10 @@ namespace GameZone.Controllers
             return View(game);
         }
 
-        public async Task<IActionResult> Delete(int id)
+        // GET: Edit game view
+        public async Task<IActionResult> Edit(int id)
         {
-            var game = await _manageApi.GetAsync<Game>($"https://localhost:7064/api/Game/{id}");
+            var game = await _manageApi.GetGameByIdAsync(id, _baseUrl);
             if (game == null)
             {
                 return NotFound();
@@ -58,10 +67,41 @@ namespace GameZone.Controllers
             return View(game);
         }
 
+        // POST: Edit game
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Game game)
+        {
+            if (id != game.Id || !ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            var success = await _manageApi.EditGameAsync(id, game, _baseUrl);
+            if (success)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            return View(game);
+        }
+
+        // GET: Delete confirmation view
+        public async Task<IActionResult> Delete(int id)
+        {
+            var game = await _manageApi.GetGameByIdAsync(id, _baseUrl);
+            if (game == null)
+            {
+                return NotFound();
+            }
+            return View(game);
+        }
+
+        // POST: Delete game
         [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            bool success = await _manageApi.DeleteAsync($"https://localhost:7064/api/Game/{id}");
+            var success = await _manageApi.DeleteGameAsync(id, _baseUrl);
             if (success)
             {
                 return RedirectToAction(nameof(Index));
@@ -69,85 +109,107 @@ namespace GameZone.Controllers
             return View();
         }
 
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Create(Game game)
-        {
-            if (ModelState.IsValid)
-            {
-                bool success = await _manageApi.PostAsync("https://localhost:7064/api/Game", game);
-                if (success)
-                {
-                    return RedirectToAction(nameof(Index));
-                }
-                else
-                {
-                    ModelState.AddModelError("", "Error creating the game.");
-                }
-            }
-            return View(game);
-        }
-
-
-        public async Task<IActionResult> Details(int id)
-        {
-            var game = await _manageApi.GetAsync<Game>($"https://localhost:7064/api/Game/{id}");
-            if (game == null)
-            {
-                return NotFound();
-            }
-            return View(game);
-        }
-
     }
+
 }
-//public class GameController : Controller
-//{
-//    private readonly string Baseurl = "https://localhost:7064/";
-//    public GameController()
+//    public class GameController : Controller
 //    {
-
-//    }
-//    public async Task<IActionResult> Index()
-//    {
-//        List<Game> games = new List<Game>();
-//        try
+//        private readonly ManageApi _manageApi;
+//        private readonly string _baseUrl;
+//        public GameController(ManageApi manageApi, IConfiguration config)
 //        {
+//            _manageApi = manageApi;
+//            _baseUrl = config.GetSection("ApiSettings")["BaseUrl"];
+//        }
+//        public async Task<IActionResult> Index()
+//        {
+//            var games = await _manageApi.GetAsync<List<Game>>(_baseUrl);
+//            return View(games);
+//        }
 
-//            var _game = await ManageAPI.GetGameAPI("api/Game/GetAll");
-//            if (!string.IsNullOrEmpty(_game))
+//        public async Task<IActionResult> Edit(int id)
+//        {
+//            var game = await _manageApi.GetAsync<Game>(_baseUrl);
+//            if (game == null)
 //            {
-//                games = JsonConvert.DeserializeObject<List<Game>>(_game);
+//                return NotFound();
+//            }
+//            return View(game);
+//        }
 
+//        [HttpPost]
+//        public async Task<IActionResult> Edit(int id, Game game)
+//        {
+//            if (id != game.Id)
+//            {
+//                return BadRequest();
 //            }
 
-//            //returning the employee list to view
-//            // return View(EmpInfo);
-//            return View(games); // Pass the games list to the view
-
-
-
-//            // Call the API to get the list of games
-//            // var games = await _httpClient.GetFromJsonAsync<List<Game>>("game");
+//            if (ModelState.IsValid)
+//            {
+//                bool success = await _manageApi.PutAsync(_baseUrl, game);
+//                if (success)
+//                {
+//                    return RedirectToAction(nameof(Index));
+//                }
+//            }
+//            return View(game);
 //        }
-//        catch (HttpRequestException ex)
+
+//        public async Task<IActionResult> Delete(int id)
 //        {
-//            // Handle network or API errors
-//            ViewBag.ErrorMessage = "Error accessing API: " + ex.Message;
-//            return View("Error");
-
+//            var game = await _manageApi.GetAsync<Game>(_baseUrl);
+//            if (game == null)
+//            {
+//                return NotFound();
+//            }
+//            return View(game);
 //        }
-//    }
-//    public async Task<IActionResult> Create()
-//    {
-//        var game = new Game();
+
+//        [HttpPost, ActionName("Delete")]
+//        public async Task<IActionResult> DeleteConfirmed(int id)
+//        {
+//            bool success = await _manageApi.DeleteAsync(_baseUrl);
+//            if (success)
+//            {
+//                return RedirectToAction(nameof(Index));
+//            }
+//            return View();
+//        }
+
+//        public IActionResult Create()
+//        {
+//            return View();
+//        }
+
+//        [HttpPost]
+//        public async Task<IActionResult> Create(Game game)
+//        {
+//            if (ModelState.IsValid)
+//            {
+//                bool success = await _manageApi.PostAsync(_baseUrl, game);
+//                if (success)
+//                {
+//                    return RedirectToAction(nameof(Index));
+//                }
+//                else
+//                {
+//                    ModelState.AddModelError("", "Error creating the game.");
+//                }
+//            }
+//            return View(game);
+//        }
+
+
+//        public async Task<IActionResult> Details(int id)
+//        {
+//            var game = await _manageApi.GetAsync<Game>(_baseUrl);
+//            if (game == null)
+//            {
+//                return NotFound();
+//            }
+//            return View(game);
+//        }
 
 //    }
-
-
 //}
-
